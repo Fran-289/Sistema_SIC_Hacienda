@@ -1,0 +1,44 @@
+# Java
+backend/target/
+*.class
+*.jar
+!backend/mvnw.jar
+backend/apache-maven-3.9.6/
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Node
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Keys (generadas localmente)
+backend/src/main/resources/jwtKeystore.p12
+backend/src/main/resources/publicKey.pem
+backend/src/main/resources/privateKey.pem
