@@ -173,7 +173,8 @@ function RegistrarIngresoForm() {
     fetchApi('/settings')
       .then((settings) => {
         if (settings?.BANK_ACCOUNT_DEFAULT) {
-          setCuentaBancaria(`${settings.BANK_ACCOUNT_DEFAULT} - INGRESOS CONSULARES`);
+          const accName = settings?.BANK_ACCOUNT_NAME || 'INGRESOS CONSULARES';
+          setCuentaBancaria(`${settings.BANK_ACCOUNT_DEFAULT} - ${accName}`);
         }
         if (settings?.CUSTOM_HOLIDAYS) {
           setCustomHolidays(parseCustomHolidays(settings.CUSTOM_HOLIDAYS));

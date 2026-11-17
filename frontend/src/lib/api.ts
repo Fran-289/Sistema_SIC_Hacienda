@@ -193,3 +193,36 @@ export async function downloadApiFile(endpoint: string, fallbackFilename: string
   link.remove();
   window.URL.revokeObjectURL(url);
 }
+
+export async function fetchApiBlobUrl(endpoint: string): Promise<string> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    method: "GET",
+    headers,
+  });
+
+  if (response.status === 401) {
+    removeToken();
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Sesión expirada. Inicie sesión nuevamente.");
+  }
+
+  if (!response.ok) {
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      const errData = await response.json();
+      throw new Error(errData?.error || "No se pudo visualizar el documento");
+    }
+    throw new Error("No se pudo visualizar el documento");
+  }
+
+  const blob = await response.blob();
+  return window.URL.createObjectURL(blob);
+}

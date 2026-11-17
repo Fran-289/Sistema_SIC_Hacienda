@@ -42,3 +42,7 @@ logs/
 backend/src/main/resources/jwtKeystore.p12
 backend/src/main/resources/publicKey.pem
 backend/src/main/resources/privateKey.pem
+
+# Archivos subidos localmente (documentos firmados)
+backend/uploads/
+uploads/

@@ -144,6 +144,7 @@ export default function BandejaIngresosPage() {
   const [registros, setRegistros] = useState<IngresoRegistro[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [maxConcentrationDays, setMaxConcentrationDays] = useState<number>(5);
 
   const formatDate = (iso: string | null): string => {
     if (!iso) return '-';
@@ -203,6 +204,14 @@ export default function BandejaIngresosPage() {
 
   useEffect(() => {
     loadRecords();
+    fetchApi('/settings')
+      .then((s) => {
+        const parsed = parseInt(s?.CONCENTRATION_MAX_DAYS, 10);
+        if (!Number.isNaN(parsed) && parsed >= 1) {
+          setMaxConcentrationDays(parsed);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleLimpiarFiltros = () => {
@@ -607,7 +616,7 @@ export default function BandejaIngresosPage() {
                     <td style={{ padding: "8px 10px", borderRight: "1px solid #3b527d", whiteSpace: 'nowrap' }}>{row.fechaConcentracion}</td>
                     <td style={{ padding: "8px 10px", borderRight: "1px solid #3b527d", fontWeight: "700", color: '#e2e8f0', whiteSpace: 'nowrap' }}>${row.deposito.toFixed(2)}</td>
                     <td style={{ padding: "8px 10px", borderRight: "1px solid #3b527d", textAlign: "center" }}>
-                      <span style={{ display: 'inline-flex', minWidth: '24px', justifyContent: 'center', backgroundColor: '#132038', border: '1px solid #2e436e', borderRadius: '5px', padding: '2px 7px', fontSize: '10.5px', fontWeight: 700, color: row.dias > 2 ? '#f59e0b' : '#94a3b8' }}>{row.dias}</span>
+                      <span style={{ display: 'inline-flex', minWidth: '24px', justifyContent: 'center', backgroundColor: '#132038', border: '1px solid #2e436e', borderRadius: '5px', padding: '2px 7px', fontSize: '10.5px', fontWeight: 700, color: row.dias > maxConcentrationDays ? '#f59e0b' : '#94a3b8' }}>{row.dias}</span>
                     </td>
                     <td style={{ padding: "8px 10px", borderRight: "1px solid #3b527d", color: row.embajadaConsulado === 'NO IDENTIFICADA' ? '#64748b' : '#e2e8f0', fontStyle: row.embajadaConsulado === 'NO IDENTIFICADA' ? 'italic' : 'normal', whiteSpace: 'nowrap' }}>{row.embajadaConsulado}</td>
                     <td style={{ padding: "8px 10px", borderRight: "1px solid #3b527d", fontWeight: 600, whiteSpace: 'nowrap' }}>{formatMoneda(row.ingreso)}</td>

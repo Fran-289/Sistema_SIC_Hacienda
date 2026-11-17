@@ -29,6 +29,12 @@ public class ReportDocument extends PanacheEntityBase {
     @Column(name = "signed_pdf_url", length = 500)
     public String signedPdfUrl;
 
+    @Column(name = "signed_file_name", length = 255)
+    public String signedFileName;
+
+    @Column(name = "uploaded_at")
+    public LocalDateTime uploadedAt;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     public LocalDateTime createdAt;
 

@@ -5,6 +5,23 @@ import { useRouter, usePathname } from 'next/navigation';
 import { getToken, getUser } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 
+const MODULE_PATH_MAP: Record<string, string> = {
+  ingresos: '/dashboard',
+  reportes: '/dashboard/reportes',
+  tareas: '/dashboard/tareas',
+  directorio: '/dashboard/directorio',
+};
+
+function resolveModuleFromPath(pathname: string | null): string {
+  if (!pathname) return 'ingresos';
+  if (pathname.startsWith('/dashboard/reportes')) return 'reportes';
+  if (pathname.startsWith('/dashboard/tareas')) return 'tareas';
+  if (pathname.startsWith('/dashboard/directorio')) return 'directorio';
+  if (pathname.startsWith('/dashboard/usuarios')) return 'usuarios';
+  if (pathname.startsWith('/dashboard/configuracion')) return 'configuracion';
+  return 'ingresos';
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -20,13 +37,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
 
       const user = getUser();
-      const isAdminRoute =
-        pathname?.startsWith('/dashboard/usuarios') ||
-        pathname?.startsWith('/dashboard/configuracion');
+      const targetModule = resolveModuleFromPath(pathname);
+      const isAdminRoute = targetModule === 'usuarios' || targetModule === 'configuracion';
 
-      if (isAdminRoute && user && user.role !== 'ADMIN') {
-        router.replace('/dashboard');
-        return;
+      if (user && user.role !== 'ADMIN') {
+        const perms: string[] = Array.isArray(user.permissions) ? user.permissions : [];
+        const fallbackModule = perms.find(p => MODULE_PATH_MAP[p]) || 'ingresos';
+        const fallbackPath = MODULE_PATH_MAP[fallbackModule] || '/dashboard';
+
+        if (isAdminRoute) {
+          router.replace(fallbackPath);
+          return;
+        }
+
+        if (perms.length > 0 && !perms.includes(targetModule)) {
+          router.replace(fallbackPath);
+          return;
+        }
       }
 
       setAuthorized(true);

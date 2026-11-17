@@ -267,16 +267,23 @@ public class RecordResource {
                     .add(scaleMoney(r.consularValue))
                     .add(scaleMoney(r.commissionValue));
 
+            String instName = readSetting("INSTITUTION_NAME", "MINISTERIO DE HACIENDA DE EL SALVADOR");
+            String deptName = readSetting("DEPARTMENT_NAME", "Direccion General de Tesoreria - Sistema de Ingresos Consulares (SIC)");
+            String bankAccount = readSetting("BANK_ACCOUNT_DEFAULT", "00110000112233");
+            String bankName = readSetting("BANK_ACCOUNT_NAME", "INGRESOS CONSULARES");
+            boolean stampRequired = "true".equalsIgnoreCase(readSetting("STAMP_REQUIRED", "true"));
+
             try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
                 float y = 720;
-                writePdfLine(cs, fontBold, 14, 55, y, "MINISTERIO DE HACIENDA DE EL SALVADOR");
+                writePdfLine(cs, fontBold, 13, 55, y, safePdf(instName.toUpperCase()));
                 y -= 18;
-                writePdfLine(cs, fontRegular, 11, 55, y, "Direccion General de Tesoreria - Sistema de Ingresos Consulares (SIC)");
+                writePdfLine(cs, fontRegular, 10.5f, 55, y, safePdf(deptName));
                 y -= 28;
                 writePdfLine(cs, fontBold, 13, 55, y, "COMPROBANTE DE REGISTRO DE INGRESO #" + r.id);
                 y -= 26;
 
                 String[][] lines = {
+                    {"Cuenta Concentradora BCR:", safePdf(bankAccount + " - " + bankName)},
                     {"Estado:", safePdf(formatDisplayStatus(r.status))},
                     {"Fecha de Deposito:", r.depositDate != null ? r.depositDate.format(DATE_FMT) : "-"},
                     {"Fecha de Concentracion BCR:", r.concentrationDate != null ? r.concentrationDate.format(DATE_FMT) : "-"},
@@ -296,6 +303,13 @@ public class RecordResource {
                     writePdfLine(cs, fontBold, 10, 55, y, pair[0]);
                     writePdfLine(cs, fontRegular, 10, 240, y, pair[1]);
                     y -= 20;
+                }
+
+                if (stampRequired) {
+                    y -= 24;
+                    writePdfLine(cs, fontBold, 9.5f, 55, y, "[ SELLO DE CONTROL INSTITUCIONAL - DGT / SIC ]");
+                    y -= 15;
+                    writePdfLine(cs, fontRegular, 9f, 55, y, "Documento oficial emitido por el Sistema de Ingresos Consulares.");
                 }
             }
 
@@ -345,6 +359,14 @@ public class RecordResource {
     private Set<LocalDate> loadCustomHolidays() {
         SystemSetting setting = SystemSetting.findById("CUSTOM_HOLIDAYS");
         return setting != null ? BusinessDayCalculator.parseCustomHolidays(setting.settingValue) : Set.of();
+    }
+
+    private String readSetting(String key, String fallback) {
+        SystemSetting setting = SystemSetting.findById(key);
+        if (setting != null && setting.settingValue != null && !setting.settingValue.isBlank()) {
+            return setting.settingValue;
+        }
+        return fallback;
     }
 
     private Response populateAndValidateRecord(Record record, RecordRequest data) {

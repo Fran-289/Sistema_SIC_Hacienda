@@ -13,6 +13,7 @@ public class InformeCaja extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
+    @Column(length = 50)
     public String correlative;
 
     @NotNull
@@ -28,6 +29,9 @@ public class InformeCaja extends PanacheEntityBase {
     @Column(name = "saldo_anterior", precision = 14, scale = 2)
     public BigDecimal saldoAnterior = BigDecimal.ZERO;
 
+    @Column(name = "total_depositos", precision = 14, scale = 2)
+    public BigDecimal totalDepositos = BigDecimal.ZERO;
+
     @Column(name = "total_pasaporte", precision = 14, scale = 2)
     public BigDecimal totalPasaporte = BigDecimal.ZERO;
 
@@ -36,6 +40,9 @@ public class InformeCaja extends PanacheEntityBase {
 
     @Column(name = "total_consulares", precision = 14, scale = 2)
     public BigDecimal totalConsulares = BigDecimal.ZERO;
+
+    @Column(name = "total_comision", precision = 14, scale = 2)
+    public BigDecimal totalComision = BigDecimal.ZERO;
 
     @Column(name = "total_diversos", precision = 14, scale = 2)
     public BigDecimal totalDiversos = BigDecimal.ZERO;
@@ -46,6 +53,9 @@ public class InformeCaja extends PanacheEntityBase {
     @NotNull
     @Column(nullable = false, length = 20)
     public String status = "PRELIMINAR";
+
+    @Column(columnDefinition = "TEXT")
+    public String observaciones;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

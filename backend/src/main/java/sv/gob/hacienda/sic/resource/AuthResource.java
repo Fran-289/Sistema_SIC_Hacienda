@@ -102,6 +102,14 @@ public class AuthResource {
                 .build();
         }
 
+        if (user.status != null && "INACTIVO".equalsIgnoreCase(user.status)) {
+            auditService.log(user, user.email, "LOGIN_CUENTA_INACTIVA",
+                    "Intento de acceso con cuenta INACTIVA desde IP: " + clientIp);
+            return Response.status(Response.Status.FORBIDDEN)
+                .entity(new LoginResponse(false, null, "Su cuenta se encuentra inactiva. Contacte al administrador del sistema.", null))
+                .build();
+        }
+
         loginAttemptService.recordSuccess(clientIp, normalizedEmail);
         String token = tokenService.generateToken(user);
 
@@ -112,6 +120,7 @@ public class AuthResource {
         userInfo.put("email", user.email);
         userInfo.put("name", user.name);
         userInfo.put("role", user.role);
+        userInfo.put("status", user.status != null ? user.status : "ACTIVO");
         userInfo.put("jobTitle", user.jobTitle != null ? user.jobTitle : "");
         userInfo.put("permissions", permissions);
 

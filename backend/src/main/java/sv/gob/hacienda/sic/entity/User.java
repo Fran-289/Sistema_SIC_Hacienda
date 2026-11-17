@@ -44,6 +44,10 @@ public class User extends PanacheEntityBase {
     public String role;
 
     @NotNull
+    @Column(nullable = false, length = 20)
+    public String status = "ACTIVO";
+
+    @NotNull
     @Column(columnDefinition = "JSON", nullable = false)
     public String permissions;
 

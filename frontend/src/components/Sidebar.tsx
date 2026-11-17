@@ -2,16 +2,31 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { getUser, removeToken } from '@/lib/api';
+import { fetchApi, getToken, getUser, removeToken } from '@/lib/api';
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [pendingTasks, setPendingTasks] = useState<number>(0);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     setUser(getUser());
+    const refreshCount = () => {
+      if (getToken()) {
+        fetchApi('/tasks/count')
+          .then((res) => {
+            if (res && typeof res.totalPending === 'number') {
+              setPendingTasks(res.totalPending);
+            }
+          })
+          .catch(() => {});
+      }
+    };
+    refreshCount();
+    window.addEventListener('sic-tasks-updated', refreshCount);
+    return () => window.removeEventListener('sic-tasks-updated', refreshCount);
   }, [pathname]);
 
   const handleLogout = () => {
@@ -224,10 +239,28 @@ export default function Sidebar() {
                   boxShadow: isSelected ? '0 4px 12px rgba(37, 99, 235, 0.3)' : 'none',
                 }}
               >
-                <span style={{ color: isSelected ? '#ffffff' : '#94a3b8', display: 'flex', alignItems: 'center' }}>
+                <span style={{ color: isSelected ? '#ffffff' : '#94a3b8', display: 'flex', alignItems: 'center', position: 'relative' }}>
                   {item.icon}
+                  {collapsed && item.id === 'tareas' && pendingTasks > 0 && (
+                    <span style={{ position: 'absolute', top: '-4px', right: '-5px', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#f59e0b' }} />
+                  )}
                 </span>
-                {!collapsed && <span>{item.label}</span>}
+                {!collapsed && <span style={{ flex: 1 }}>{item.label}</span>}
+                {!collapsed && item.id === 'tareas' && pendingTasks > 0 && (
+                  <span
+                    style={{
+                      fontSize: '10.5px',
+                      fontWeight: 800,
+                      padding: '2px 7px',
+                      borderRadius: '999px',
+                      backgroundColor: isSelected ? 'rgba(255,255,255,.22)' : 'rgba(245,158,11,.2)',
+                      color: isSelected ? '#ffffff' : '#fcd34d',
+                      border: isSelected ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(245,158,11,.45)',
+                    }}
+                  >
+                    {pendingTasks}
+                  </span>
+                )}
               </button>
             );
           })}

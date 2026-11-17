@@ -37,6 +37,14 @@ public class LoginAttemptService {
         attempts.remove(buildKey(ip, email));
     }
 
+    public void clearBlocksForEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return;
+        }
+        String suffix = "|" + safe(email);
+        attempts.keySet().removeIf(k -> k.endsWith(suffix));
+    }
+
     private boolean isKeyBlocked(String key, long now) {
         AttemptRecord rec = attempts.get(key);
         if (rec == null) {
